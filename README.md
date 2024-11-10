@@ -4,9 +4,14 @@
 * docs.rs: https://docs.rs/egui-widget-texicon
 * Github: https://github.com/Resonanz/egui-widget-texicon
 
+### Links to icons
+
+* https://phosphoricons.com
+* https://fonts.google.com
+
 ## What is egui-widget-texicon?
 
-egui-widget-texicon is an egui widget that combines an icon and text, often found in modern UIs.
+egui-widget-texicon is an egui widget that combines an icon and text. Such an arrangement is often found in modern UIs.
 
 Please submit an issue on Github if you have suggestions or improvements.
 
@@ -25,63 +30,61 @@ Or you could use the following if developing locally:
 egui-widget-texicon = { path = "/Github/egui-widget-texicon/" }
 ```
 
-### The following asumes you are using eframe_template:
-
-
-
-
-
-
-
-
-
-
-In ```app.rs``` import the crate using:
-
-```use egui_themes::{StateMachine, MOCHA};```
-
-Using the ```TemplateApp``` struct, define a ```run_once``` boolean and a ```StateMachine``` variable to hold the current theme:
+Import the crate using
 
 ```
-pub struct TemplateApp {
-    run_once: bool,
-    my_theme: StateMachine,
-}
-
-impl Default for TemplateApp {
-    fn default() -> Self {
-        Self {
-            run_once: false,
-            my_theme: egui_themes::StateMachine::new(),
-        }
-    }
-}
+use egui_widget_texicon::{Config, Texicon};
 ```
 
-Inside ```fn update...``` set the startup theme state using the ```run_once``` boolean:
+To add images, define a constant that points to each image file.
+
+As illustrated below, these can be PNG or SVG or other image formats supported by egui's image_loader (https://docs.rs/egui/latest/egui/macro.include_image.html).
+
+Note that loading images using the ```include_image!``` macro bakes the raw image bytes into the binary file.
 
 ```
-fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
-    if self.run_once == false {
-        self.run_once = true;
-        self.my_theme.set_theme(ctx, &MOCHA);
-    }
-```
- Then in the main loop:
-
-```
-// Theme cycle button
-let b = ui.add(egui::Button::new("☀🌙").sense(Sense::click()));
-
-if b.clicked() {
-    self.my_theme.rotate_theme(&ctx);
-} else if b.hovered() {
-    b.on_hover_text("Click for next theme...");
-}
+const IMG_CAMERA: egui::ImageSource<'_> = egui::include_image!("../assets/pics/google-camera.png");
+const IMG_SCATTER: egui::ImageSource<'_> = egui::include_image!("../assets/pics/chart-scatter.png");
+const IMG_PROCESS: egui::ImageSource<'_> = egui::include_image!("../assets/pics/google-grain.png");
+const IMG_IOS192: egui::ImageSource<'_> = egui::include_image!("../assets/pics/gear.svg");
 ```
 
+Create a left side SidePanel, define the button details including button ```text```, and add the ```Texicon``` to the SidePanel.
 
+```
+SidePanel::left("Left panel").show(ctx, |ui| {
 
+    let image_name = Config {
+        icon_width: 32.,
+        icon_height: 32.,
+        text_width: 80.,
+        text_height: 80.,
+        icon_text_gap: 4.,
+        color_light: Color32::DARK_GRAY,
+        color_light_hover: Color32::BLACK,
+        color_dark: Color32::GRAY,
+        color_dark_hover: Color32::WHITE,
+        text: "Settings",
+        img: IMG_IOS192,
+    };
+
+    ui.vertical_centered(|ui| {
+        ui.add_space(10.);
+        if ui.add(Texicon::new(image_name)).clicked() {  // Texicon 1
+            println!("Clicked btn 1");
+        };
+        ui.add_space(10.);
+        if ui.add(Texicon::new(image_name)).clicked() {  // Texicon 2
+            println!("Clicked btn 2");
+        };
+        ui.add_space(10.);
+        if ui.add(Texicon::new(image_name)).clicked() {  // Texicon 3
+            println!("Clicked btn 3");
+        };
+        ui.add_space(10.);
+        warn_if_debug_build(ui);
+    });
+});
 
 ## Video
 https://github.com/user-attachments/assets/976e0efa-d208-4eef-ac2e-24e4bb41646d
