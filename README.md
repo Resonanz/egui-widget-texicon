@@ -88,4 +88,5 @@ SidePanel::left("Left panel").show(ctx, |ui| {
 ```
 
 ## Video
-https://github.com/user-attachments/assets/976e0efa-d208-4eef-ac2e-24e4bb41646d
+[Screencast from 2024-11-10 21-07-04.webm](https://github.com/user-attachments/assets/9beadb56-4573-498f-b11f-9e0dac7cdb5a)
+
