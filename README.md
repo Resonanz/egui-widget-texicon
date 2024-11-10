@@ -85,6 +85,7 @@ SidePanel::left("Left panel").show(ctx, |ui| {
         warn_if_debug_build(ui);
     });
 });
+```
 
 ## Video
 https://github.com/user-attachments/assets/976e0efa-d208-4eef-ac2e-24e4bb41646d
