@@ -1,0 +1,15 @@
+[package]
+name = "egui-widget-texicon"
+version = "0.1.0"
+authors = ["Rob Ward <rob@resona.nz>"]
+edition = "2021"
+include = ["LICENSE-MIT", "**/*.rs", "Cargo.toml"]
+rust-version = "1.82"
+repository = "https://github.com/resonanz/egui-widget-texicon"
+keywords = ["eframe", "egui", "ui", "widgets"]
+description = "An egui widget that combines an icon and text, often found in modern UIs."
+license = "MIT"
+documentation = "https://docs.rs/egui-widget-texicon"
+
+[dependencies]
+egui = "0.29.1"
