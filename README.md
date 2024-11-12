@@ -1,3 +1,6 @@
+# egui-widget-shapes
+An egui widget that combines an icon and text, often found in modern UIs.
+
 ## Links
 
 * Crates.io: https://crates.io/crates/egui-widget-texicon
