@@ -1,5 +1,5 @@
 # egui-widget-shapes
-An egui widget that combines an icon and text, often found in modern UIs.
+An egui widget that combines an icon + text, as often found in modern UIs.
 
 ## Links
 
@@ -14,7 +14,7 @@ An egui widget that combines an icon and text, often found in modern UIs.
 
 ## What is egui-widget-texicon?
 
-egui-widget-texicon is an egui widget that combines an icon and text. Such an arrangement is often found in modern UIs.
+egui-widget-texicon is an egui widget that combines an icon + text. Such an arrangement is often found in modern UIs.
 
 Please submit an issue on Github if you have suggestions or improvements.
 
@@ -30,7 +30,7 @@ egui-widget-texicon = 0.1.0  <--- The latest version number can be found on Crat
 Or you could use the following if developing locally:
 ```
 [dependencies]
-egui-widget-texicon = { path = "/Github/egui-widget-texicon/" }
+egui-widget-texicon = { path = "/Local_Path/egui-widget-texicon/" }
 ```
 
 Import the crate using
@@ -46,10 +46,10 @@ As illustrated below, these can be PNG or SVG or other image formats supported b
 Note that loading images using the ```include_image!``` macro bakes the raw image bytes into the binary file.
 
 ```
-const IMG_CAMERA: egui::ImageSource<'_> = egui::include_image!("../assets/pics/google-camera.png");
-const IMG_SCATTER: egui::ImageSource<'_> = egui::include_image!("../assets/pics/chart-scatter.png");
-const IMG_PROCESS: egui::ImageSource<'_> = egui::include_image!("../assets/pics/google-grain.png");
-const IMG_IOS192: egui::ImageSource<'_> = egui::include_image!("../assets/pics/gear.svg");
+pub const IMG_CAMERA: egui::ImageSource<'_> = egui::include_image!("../assets/pics/googlecamera.png");
+pub const IMG_SCATTER: egui::ImageSource<'_> = egui::include_image!("../assets/pics/chartscatter.png");
+pub const IMG_PROCESS: egui::ImageSource<'_> = egui::include_image!("../assets/pics/googlegrain.png");
+pub const IMG_IOS192: egui::ImageSource<'_> = egui::include_image!("../assets/pics/gear.svg");
 ```
 
 Create a left side SidePanel, define the button details including button ```text```, and add the ```Texicon``` to the SidePanel.
@@ -92,4 +92,3 @@ SidePanel::left("Left panel").show(ctx, |ui| {
 
 ## Video
 [Screencast from 2024-11-10 21-07-04.webm](https://github.com/user-attachments/assets/9beadb56-4573-498f-b11f-9e0dac7cdb5a)
-
