@@ -178,12 +178,12 @@ pub struct SidebarTexicon<'a> {
 }
 
 impl<'a> SidebarTexicon<'a> {
-    pub fn new(config: Config<'a>) -> Self {
+    pub fn new(image: &'a ImageSource<'a>) -> Self {
         Self {
             texicon_camera_on_off: OnOffState::Off,
             texicon_camera_mouse: MouseState::Off,
             texicon_camera_color: ColorState::Off,
-            config,
+            config: ConfigBuilder::new(&image).build(),
         }
     }
 }
