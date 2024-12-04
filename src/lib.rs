@@ -3,10 +3,10 @@ use egui::{Color32, ImageSource, Label, Margin, Response, RichText, Sense, Ui, V
 // mod defs_and_consts;
 
 #[derive(Default, PartialEq)]
-pub enum TexOnOffState {
+pub enum TexSelectedState {
     #[default]
-    Off,
-    On,
+    Deselected,
+    Selected,
     Disabled,
 }
 
@@ -23,7 +23,7 @@ pub enum TexColorState {
     #[default]
     Dim,
     On,
-    OnBright,
+    Highlight,
 }
 //
 // ======================================================================
@@ -178,18 +178,18 @@ impl<'a> ConfigBuilder<'a> {
 //
 //
 pub struct SidebarTexicon<'a> {
-    pub texicon_on_off: TexOnOffState,
-    pub texicon_mouse: TexMouseState,
-    pub texicon_color: TexColorState,
+    pub texi_state: TexSelectedState,
+    pub texi_mouse: TexMouseState,
+    pub texi_color: TexColorState,
     pub config: Config<'a>,
 }
 
 impl<'a> SidebarTexicon<'a> {
     pub fn new(config: Config<'a>) -> Self {
         Self {
-            texicon_on_off: TexOnOffState::Off,
-            texicon_mouse: TexMouseState::None,
-            texicon_color: TexColorState::Dim,
+            texi_state: TexSelectedState::Deselected,
+            texi_mouse: TexMouseState::None,
+            texi_color: TexColorState::Dim,
             config,
         }
     }
@@ -203,7 +203,7 @@ impl<'a> SidebarTexicon<'a> {
 
 #[must_use = "You should put this widget in a ui with `ui.add(widget);`"]
 pub struct Texicon<'a> {
-    on_off_state: &'a mut TexOnOffState,
+    on_off_state: &'a mut TexSelectedState,
     mouse_state: &'a mut TexMouseState,
     color_state: &'a mut TexColorState,
     config: &'a Config<'a>,
@@ -212,9 +212,9 @@ pub struct Texicon<'a> {
 impl<'a> Texicon<'a> {
     pub fn new(sidebar_texicon: &'a mut SidebarTexicon) -> Self {
         Self {
-            on_off_state: &mut sidebar_texicon.texicon_on_off,
-            mouse_state: &mut sidebar_texicon.texicon_mouse,
-            color_state: &mut sidebar_texicon.texicon_color,
+            on_off_state: &mut sidebar_texicon.texi_state,
+            mouse_state: &mut sidebar_texicon.texi_mouse,
+            color_state: &mut sidebar_texicon.texi_color,
             config: &mut sidebar_texicon.config,
         }
     }
@@ -245,7 +245,7 @@ impl<'a> Widget for Texicon<'a> {
                 let tint_color = match *self.color_state {
                     TexColorState::Dim => ui.style().visuals.weak_text_color(),
                     TexColorState::On => ui.style().visuals.strong_text_color(),
-                    TexColorState::OnBright => ui.style().visuals.error_fg_color,
+                    TexColorState::Highlight => ui.style().visuals.error_fg_color,
                 };
 
                 // ATexColorState
