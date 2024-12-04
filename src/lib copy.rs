@@ -1,63 +1,27 @@
-use egui::{Color32, ImageSource, Label, Margin, Response, Sense, Ui, Vec2, Widget};
+use egui::{Color32, ImageSource, Label, Margin, Response, RichText, Sense, Ui, Vec2, Widget};
 
-mod defs_and_consts;
-use defs_and_consts::{
-    DEFAULT_TEXT, FRAME_SIZE, ICON_SIZE, ICON_TEXT_SPACE, TEXT_SIZE, WIDGET_SPACE_ABOVE,
-    WIDGET_SPACE_BELOW,
-};
-
-// /// Configuration for the
-// /// widget appearance
-// //#[derive(Clone)]
-// struct WidgetFrame {
-//     // Frame config
-//     size_image: Vec2,
-//     size_frame: Vec2,
-//     // stroke: Stroke,
-//     // stroke_hover: Stroke,
-//     // fill: Color32,
-//     // fill_hover: Color32,
-// }
-
-// impl Default for WidgetFrame {
-//     fn default() -> Self {
-//         Self {
-//             // Frame
-//             size_image: Vec2::new(60.0, 60.0),
-//             size_frame: Vec2::new(100.0, 100.0),
-//             // stroke: Stroke::new(1.0, Color32::from_gray(100)),
-//             // stroke_hover: Stroke::new(1.0, Color32::WHITE),
-//             // fill: Color32::BLACK,
-//             // fill_hover: Color32::from_black_alpha(123),
-//         }
-//     }
-// }
-
-//
-// ======================================================================
-// ======================================================================
-// ======================================================================
-//
+// mod defs_and_consts;
 
 #[derive(Default, PartialEq)]
-pub enum OnOffState {
+pub enum TexOnOffState {
     #[default]
     Off,
     On,
+    Disabled,
 }
 
 #[derive(Default, PartialEq)]
-pub enum MouseState {
+pub enum TexMouseState {
     #[default]
-    Off,
+    None,
     Clicked,
     Hovering,
 }
 
 #[derive(Default, PartialEq)]
-pub enum ColorState {
+pub enum TexColorState {
     #[default]
-    Off,
+    Dim,
     On,
     OnBright,
 }
@@ -73,10 +37,12 @@ pub struct Config<'a> {
     text: &'a str,
     frame_size: Vec2,
     icon_size: Vec2,
-    text_size: Vec2,
-    widget_space_above: f32,
-    widget_space_below: f32,
-    icon_text_space: f32,
+    text_size: f32,
+    outer_margin_left: f32,
+    outer_margin_right: f32,
+    outer_margin_top: f32,
+    outer_margin_bottom: f32,
+    icon_text_gap: f32,
     color_light: Color32,
     color_light_hover: Color32,
     color_dark: Color32,
@@ -94,10 +60,12 @@ pub struct ConfigBuilder<'a> {
     text: &'a str,
     frame_size: Vec2,
     icon_size: Vec2,
-    text_size: Vec2,
-    widget_space_above: f32,
-    widget_space_below: f32,
-    icon_text_space: f32,
+    text_size: f32,
+    outer_margin_left: f32,
+    outer_margin_right: f32,
+    outer_margin_top: f32,
+    outer_margin_bottom: f32,
+    icon_text_gap: f32,
     color_light: Color32,
     color_light_hover: Color32,
     color_dark: Color32,
@@ -108,17 +76,19 @@ impl<'a> ConfigBuilder<'a> {
     pub fn new(img: &'a ImageSource<'a>) -> Self {
         ConfigBuilder {
             img,
-            text: DEFAULT_TEXT,
-            frame_size: FRAME_SIZE,
-            icon_size: ICON_SIZE,
-            text_size: TEXT_SIZE,
-            widget_space_above: WIDGET_SPACE_ABOVE,
-            widget_space_below: WIDGET_SPACE_BELOW,
-            icon_text_space: ICON_TEXT_SPACE,
-            color_light: Color32::DARK_GRAY,
-            color_light_hover: Color32::BLACK,
-            color_dark: Color32::GRAY,
-            color_dark_hover: Color32::WHITE,
+            text: "Default text",
+            frame_size: Vec2 { x: 100.0, y: 60.0 },
+            icon_size: Vec2 { x: 40.0, y: 40.0 },
+            text_size: 16.0,
+            outer_margin_left: 0.0,
+            outer_margin_right: 0.0,
+            outer_margin_top: 0.0,
+            outer_margin_bottom: 0.0,
+            icon_text_gap: 4.0,
+            color_light: Color32::PLACEHOLDER,
+            color_light_hover: Color32::PLACEHOLDER,
+            color_dark: Color32::PLACEHOLDER,
+            color_dark_hover: Color32::PLACEHOLDER,
         }
     }
 
@@ -127,13 +97,48 @@ impl<'a> ConfigBuilder<'a> {
         self
     }
 
+    pub fn frame_size(mut self, frame_size: Vec2) -> Self {
+        self.frame_size = frame_size;
+        self
+    }
+
     pub fn icon_size(mut self, icon_size: Vec2) -> Self {
         self.icon_size = icon_size;
         self
     }
 
-    pub fn text_size(mut self, text_size: Vec2) -> Self {
-        self.text_size = self.text_size;
+    pub fn text_size(mut self, text_size: f32) -> Self {
+        self.text_size = text_size;
+        self
+    }
+
+    pub fn outer_margin_left(mut self, outer_margin_left: f32) -> Self {
+        self.outer_margin_left = outer_margin_left;
+        self
+    }
+
+    pub fn outer_margin_right(mut self, outer_margin_right: f32) -> Self {
+        self.outer_margin_right = outer_margin_right;
+        self
+    }
+
+    pub fn outer_margin_top(mut self, outer_margin_top: f32) -> Self {
+        self.outer_margin_top = outer_margin_top;
+        self
+    }
+
+    pub fn outer_margin_bottom(mut self, outer_margin_bottom: f32) -> Self {
+        self.outer_margin_bottom = outer_margin_bottom;
+        self
+    }
+
+    pub fn icon_text_space(mut self, icon_text_gap: f32) -> Self {
+        self.icon_text_gap = icon_text_gap;
+        self
+    }
+
+    pub fn color_light(mut self, color_light: Color32) -> Self {
+        self.color_light = color_light;
         self
     }
 
@@ -144,9 +149,11 @@ impl<'a> ConfigBuilder<'a> {
             frame_size: self.frame_size,
             icon_size: self.icon_size,
             text_size: self.text_size,
-            widget_space_above: self.widget_space_above,
-            widget_space_below: self.widget_space_below,
-            icon_text_space: self.icon_text_space,
+            outer_margin_left: self.outer_margin_left,
+            outer_margin_right: self.outer_margin_right,
+            outer_margin_top: self.outer_margin_top,
+            outer_margin_bottom: self.outer_margin_bottom,
+            icon_text_gap: self.icon_text_gap,
             color_light: self.color_light,
             color_light_hover: self.color_light_hover,
             color_dark: self.color_dark,
@@ -171,19 +178,19 @@ impl<'a> ConfigBuilder<'a> {
 //
 //
 pub struct SidebarTexicon<'a> {
-    pub texicon_camera_on_off: OnOffState,
-    pub texicon_camera_mouse: MouseState,
-    pub texicon_camera_color: ColorState,
+    pub texicon_on_off: TexOnOffState,
+    pub texicon_mouse: TexMouseState,
+    pub texicon_color: TexColorState,
     pub config: Config<'a>,
 }
 
 impl<'a> SidebarTexicon<'a> {
-    pub fn new(image: &'a ImageSource<'a>) -> Self {
+    pub fn new(config: Config<'a>) -> Self {
         Self {
-            texicon_camera_on_off: OnOffState::Off,
-            texicon_camera_mouse: MouseState::Off,
-            texicon_camera_color: ColorState::Off,
-            config: ConfigBuilder::new(&image).build(),
+            texicon_on_off: TexOnOffState::Off,
+            texicon_mouse: TexMouseState::None,
+            texicon_color: TexColorState::Dim,
+            config,
         }
     }
 }
@@ -196,117 +203,22 @@ impl<'a> SidebarTexicon<'a> {
 
 #[must_use = "You should put this widget in a ui with `ui.add(widget);`"]
 pub struct Texicon<'a> {
-    on_off_state: &'a mut OnOffState,
-    mouse_state: &'a mut MouseState,
-    color_state: &'a mut ColorState,
+    on_off_state: &'a mut TexOnOffState,
+    mouse_state: &'a mut TexMouseState,
+    color_state: &'a mut TexColorState,
     config: &'a Config<'a>,
 }
 
 impl<'a> Texicon<'a> {
     pub fn new(sidebar_texicon: &'a mut SidebarTexicon) -> Self {
         Self {
-            on_off_state: &mut sidebar_texicon.texicon_camera_on_off,
-            mouse_state: &mut sidebar_texicon.texicon_camera_mouse,
-            color_state: &mut sidebar_texicon.texicon_camera_color,
+            on_off_state: &mut sidebar_texicon.texicon_on_off,
+            mouse_state: &mut sidebar_texicon.texicon_mouse,
+            color_state: &mut sidebar_texicon.texicon_color,
             config: &mut sidebar_texicon.config,
         }
     }
 }
-
-// on_off_state: &'a mut OnOffState,
-// mouse_state: &'a mut MouseState,
-// color_state: &'a mut ColorState,
-// config: &'a Config,
-
-// on_off_state,
-// mouse_state,
-// color_state,
-// config,
-
-// impl<'a> Widget for Texicon<'a> {
-//     fn ui(self, ui: &mut Ui) -> Response {
-//         // Instantiate the required
-//         // widget building blocks
-//         // let widget_frame = WidgetFrame::default();
-//         //
-//         //
-//         // Define the frame
-//         //
-//         let response = egui::Frame::default()
-//             .inner_margin(0.0)
-//             .outer_margin(0.0)
-//             .show(ui, |ui| {
-//                 // let visuals = ui.style().visuals;
-
-//                 // Set the minimum size of
-//                 // the ui (that is, the frame)
-//                 // ui.set_min_size(widget_frame.size);
-//                 // ui.set_max_size(widget_frame.size);
-//                 let origin = ui.min_rect().min;
-
-//                 // const IMG2: egui::ImageSource<'_> =
-//                 //     egui::include_image!("../assets/pics/testtube_black.svg");
-//                 // let i = self.config.img;
-
-//                 // Draw image
-//                 let both_responses = ui.allocate_ui_with_layout(
-//                     Vec2 {
-//                         x: self.config.icon_width,
-//                         y: self.config.icon_height,
-//                     }, // Desired size
-//                     egui::Layout::top_down(egui::Align::Center), // Layout configuration
-//                     |ui| {
-//                         ui.add_space(self.config.widget_gap_above);
-//                         let icon_response = ui
-//                             .add_sized(
-//                                 [self.config.icon_width, self.config.icon_height],
-//                                 egui::Image::new(self.config.img.to_owned())
-//                                     .tint(ui.style().visuals.warn_fg_color),
-//                             )
-//                             .interact(Sense::click());
-
-//                         ui.add_space(self.config.widget_gap_above);
-//                         let text_response = ui
-//                             .allocate_rect(
-//                                 Rect {
-//                                     min: pos2(origin.x + 0.0, origin.y + 20.0),
-//                                     max: pos2(origin.x + 40.0, origin.y + 40.0),
-//                                 },
-//                                 Sense::click(),
-//                             )
-//                             .interact(Sense::click());
-
-//                         // UI contents go here
-//                         ui.label("Left-aligned content");
-//                         ui.button("Some button");
-//                         (icon_response, text_response)
-//                     },
-//                 );
-//                 // Combine the responses
-//                 let mut response = both_responses.response;
-//                 // Update the response's clicked state based on either rectangle being clicked
-//                 let (icon_response, text_response) = both_responses.inner;
-//                 if icon_response.clicked() || text_response.clicked() {
-//                     response.mark_changed();
-//                 }
-
-//                 // Determine if hover and set flag
-//                 // for later hover color settings
-
-//                 // Update mouse state based on the interaction with the widget
-//                 *self.mouse_state = if response.clicked() {
-//                     MouseState::Clicked
-//                 } else if response.contains_pointer() {
-//                     MouseState::Hovering
-//                 } else {
-//                     MouseState::Off
-//                 };
-
-//                 response
-//             });
-//         response.inner
-//     }
-// }
 
 impl<'a> Widget for Texicon<'a> {
     fn ui(self, ui: &mut Ui) -> Response {
@@ -315,17 +227,28 @@ impl<'a> Widget for Texicon<'a> {
             .inner_margin(Margin {
                 left: 0.0,
                 right: 0.0,
-                top: self.config.widget_space_above,
+                top: 0.0,
                 bottom: 0.0,
             })
-            .outer_margin(0.0)
+            .outer_margin(Margin {
+                left: self.config.outer_margin_left,
+                right: self.config.outer_margin_right,
+                top: self.config.outer_margin_top,
+                bottom: self.config.outer_margin_bottom,
+            })
             .show(ui, |ui| {
                 // Set the minimum size of
                 // the ui (that is, the frame)
                 ui.set_min_size(self.config.frame_size);
                 ui.set_max_size(self.config.frame_size); // Layout the icon and text vertically with some spacing
 
-                // Add frame
+                let tint_color = match *self.color_state {
+                    TexColorState::Dim => ui.style().visuals.weak_text_color(),
+                    TexColorState::On => ui.style().visuals.strong_text_color(),
+                    TexColorState::OnBright => ui.style().visuals.error_fg_color,
+                };
+
+                // ATexColorState
                 ui.allocate_ui_with_layout(
                     self.config.frame_size,
                     egui::Layout::top_down(egui::Align::Center),
@@ -334,36 +257,42 @@ impl<'a> Widget for Texicon<'a> {
                         let icon_response = ui
                             .add_sized(
                                 self.config.icon_size,
-                                egui::Image::new(self.config.img.to_owned())
-                                    .tint(ui.style().visuals.warn_fg_color), // Adjust color if necessary
+                                egui::Image::new(self.config.img.to_owned()).tint(tint_color), // Adjust color if necessary
                             )
                             .interact(Sense::click());
 
                         // Add some vertical spacing
-                        ui.add_space(self.config.icon_text_space);
+                        ui.add_space(self.config.icon_text_gap);
 
                         // Add text
                         let text_response = ui
-                            .add(Label::new("Configuration").selectable(false))
+                            .add(
+                                Label::new(
+                                    RichText::new(self.config.text)
+                                        .color(tint_color)
+                                        .size(self.config.text_size),
+                                )
+                                .selectable(false),
+                            )
                             .interact(Sense::click());
 
                         // Update state depending upon response
                         if icon_response.clicked {
-                            *self.mouse_state = MouseState::Clicked
+                            *self.mouse_state = TexMouseState::Clicked
                         } else if icon_response.contains_pointer() {
-                            *self.mouse_state = MouseState::Hovering
+                            *self.mouse_state = TexMouseState::Hovering
                         } else {
-                            *self.mouse_state = MouseState::Off
+                            *self.mouse_state = TexMouseState::None
                         }
 
                         *self.mouse_state = if icon_response.clicked || text_response.clicked {
-                            MouseState::Clicked
+                            TexMouseState::Clicked
                         } else if icon_response.contains_pointer()
                             || text_response.contains_pointer()
                         {
-                            MouseState::Hovering
+                            TexMouseState::Hovering
                         } else {
-                            MouseState::Off
+                            TexMouseState::None
                         }
                     },
                 );
