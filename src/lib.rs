@@ -23,7 +23,7 @@ use egui::{
 ///
 ///
 #[derive(Default, PartialEq)]
-pub enum TexMouseState {
+pub enum TexiMouseState {
     #[default]
     None,
     Clicked,
@@ -31,7 +31,7 @@ pub enum TexMouseState {
 }
 
 #[derive(Default, PartialEq)]
-pub enum TexColorState {
+pub enum TexiColorState {
     #[default]
     Dim,
     On,
@@ -54,10 +54,6 @@ pub struct Config<'a> {
     outer_margin: Margin,
     rounding: Rounding,
     icon_text_gap: f32,
-    color_light: Color32,
-    color_light_hover: Color32,
-    color_dark: Color32,
-    color_dark_hover: Color32,
 }
 //
 // ======================================================================
@@ -76,10 +72,6 @@ pub struct ConfigBuilder<'a> {
     outer_margin: Margin,
     rounding: Rounding,
     icon_text_gap: f32,
-    color_light: Color32,
-    color_light_hover: Color32,
-    color_dark: Color32,
-    color_dark_hover: Color32,
 }
 
 impl<'a> ConfigBuilder<'a> {
@@ -93,11 +85,7 @@ impl<'a> ConfigBuilder<'a> {
             inner_margin: Margin::same(0.0),
             outer_margin: Margin::same(0.0),
             rounding: Rounding::same(0.0),
-            icon_text_gap: 4.0,
-            color_light: Color32::PLACEHOLDER,
-            color_light_hover: Color32::PLACEHOLDER,
-            color_dark: Color32::PLACEHOLDER,
-            color_dark_hover: Color32::PLACEHOLDER,
+            icon_text_gap: 0.0,
         }
     }
 
@@ -141,11 +129,6 @@ impl<'a> ConfigBuilder<'a> {
         self
     }
 
-    pub fn color_light(mut self, color_light: Color32) -> Self {
-        self.color_light = color_light;
-        self
-    }
-
     pub fn build(self) -> Config<'a> {
         Config {
             img: self.img,
@@ -157,10 +140,6 @@ impl<'a> ConfigBuilder<'a> {
             outer_margin: self.outer_margin,
             rounding: self.rounding,
             icon_text_gap: self.icon_text_gap,
-            color_light: self.color_light,
-            color_light_hover: self.color_light_hover,
-            color_dark: self.color_dark,
-            color_dark_hover: self.color_dark_hover,
         }
     }
 }
@@ -180,19 +159,19 @@ impl<'a> ConfigBuilder<'a> {
 // This struct is instantiated in the calling crate.
 //
 //
-pub struct SidebarTexicon<'a> {
+pub struct TexiSidebar<'a> {
     // pub texi_state: TexSelectedState,
-    pub texi_mouse: TexMouseState,
-    pub texi_color: TexColorState,
+    pub texi_mouse: TexiMouseState,
+    pub texi_color: TexiColorState,
     pub config: Config<'a>,
 }
 
-impl<'a> SidebarTexicon<'a> {
+impl<'a> TexiSidebar<'a> {
     pub fn new(config: Config<'a>) -> Self {
         Self {
             // texi_state: TexSelectedState::Deselected,
-            texi_mouse: TexMouseState::None,
-            texi_color: TexColorState::Dim,
+            texi_mouse: TexiMouseState::None,
+            texi_color: TexiColorState::Dim,
             config,
         }
     }
@@ -207,13 +186,13 @@ impl<'a> SidebarTexicon<'a> {
 #[must_use = "You should put this widget in a ui with `ui.add(widget);`"]
 pub struct Texicon<'a> {
     // on_off_state: &'a mut TexSelectedState,
-    mouse_state: &'a mut TexMouseState,
-    color_state: &'a mut TexColorState,
+    mouse_state: &'a mut TexiMouseState,
+    color_state: &'a mut TexiColorState,
     config: &'a Config<'a>,
 }
 
 impl<'a> Texicon<'a> {
-    pub fn new(sidebar_texicon: &'a mut SidebarTexicon) -> Self {
+    pub fn new(sidebar_texicon: &'a mut TexiSidebar) -> Self {
         Self {
             // on_off_state: &mut sidebar_texicon.texi_state,
             mouse_state: &mut sidebar_texicon.texi_mouse,
@@ -237,10 +216,11 @@ impl<'a> Widget for Texicon<'a> {
                 ui.set_min_size(self.config.frame_size);
                 ui.set_max_size(self.config.frame_size); // Layout the icon and text vertically with some spacing
 
+                // Set colors for text and icon
                 let tint_color = match *self.color_state {
-                    TexColorState::Dim => ui.style().visuals.weak_text_color(),
-                    TexColorState::On => ui.style().visuals.strong_text_color(),
-                    TexColorState::Highlight => ui.style().visuals.error_fg_color,
+                    TexiColorState::Dim => ui.style().visuals.weak_text_color(),
+                    TexiColorState::On => ui.style().visuals.text_color(),
+                    TexiColorState::Highlight => ui.style().visuals.warn_fg_color,
                 };
 
                 // A TexColorState???
@@ -273,21 +253,21 @@ impl<'a> Widget for Texicon<'a> {
 
                         // Update state depending upon response
                         if icon_response.clicked {
-                            *self.mouse_state = TexMouseState::Clicked
+                            *self.mouse_state = TexiMouseState::Clicked
                         } else if icon_response.contains_pointer() {
-                            *self.mouse_state = TexMouseState::Hovering
+                            *self.mouse_state = TexiMouseState::Hovering
                         } else {
-                            *self.mouse_state = TexMouseState::None
+                            *self.mouse_state = TexiMouseState::None
                         }
 
                         *self.mouse_state = if icon_response.clicked || text_response.clicked {
-                            TexMouseState::Clicked
+                            TexiMouseState::Clicked
                         } else if icon_response.contains_pointer()
                             || text_response.contains_pointer()
                         {
-                            TexMouseState::Hovering
+                            TexiMouseState::Hovering
                         } else {
-                            TexMouseState::None
+                            TexiMouseState::None
                         }
                     },
                 );
