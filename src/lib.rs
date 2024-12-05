@@ -1,15 +1,27 @@
-use egui::{Color32, ImageSource, Label, Margin, Response, RichText, Sense, Ui, Vec2, Widget};
+use egui::{
+    Color32, ImageSource, Label, Margin, Response, RichText, Rounding, Sense, Ui, Vec2, Widget,
+};
 
-// mod defs_and_consts;
+// #[derive(Default, PartialEq)]
+// pub enum TexSelectedState {
+//     #[default]
+//     Deselected,
+//     Selected,
+//     Disabled,
+// }
 
-#[derive(Default, PartialEq)]
-pub enum TexSelectedState {
-    #[default]
-    Deselected,
-    Selected,
-    Disabled,
-}
-
+///
+/// A number of different methods are used
+/// to share information between your app
+/// and the widget.
+///
+/// 1. A ```Config``` struct is used to configure
+///    the properties of the widget.
+/// 2. A ```SidebarTexicon``` struct is used to
+///    share state information between the widget
+///    and the main application.
+///
+///
 #[derive(Default, PartialEq)]
 pub enum TexMouseState {
     #[default]
@@ -38,10 +50,9 @@ pub struct Config<'a> {
     frame_size: Vec2,
     icon_size: Vec2,
     text_size: f32,
-    outer_margin_left: f32,
-    outer_margin_right: f32,
-    outer_margin_top: f32,
-    outer_margin_bottom: f32,
+    inner_margin: Margin,
+    outer_margin: Margin,
+    rounding: Rounding,
     icon_text_gap: f32,
     color_light: Color32,
     color_light_hover: Color32,
@@ -61,10 +72,9 @@ pub struct ConfigBuilder<'a> {
     frame_size: Vec2,
     icon_size: Vec2,
     text_size: f32,
-    outer_margin_left: f32,
-    outer_margin_right: f32,
-    outer_margin_top: f32,
-    outer_margin_bottom: f32,
+    inner_margin: Margin,
+    outer_margin: Margin,
+    rounding: Rounding,
     icon_text_gap: f32,
     color_light: Color32,
     color_light_hover: Color32,
@@ -77,13 +87,12 @@ impl<'a> ConfigBuilder<'a> {
         ConfigBuilder {
             img,
             text: "Default text",
-            frame_size: Vec2 { x: 100.0, y: 60.0 },
+            frame_size: Vec2 { x: 40.0, y: 60.0 },
             icon_size: Vec2 { x: 40.0, y: 40.0 },
             text_size: 16.0,
-            outer_margin_left: 0.0,
-            outer_margin_right: 0.0,
-            outer_margin_top: 0.0,
-            outer_margin_bottom: 0.0,
+            inner_margin: Margin::same(0.0),
+            outer_margin: Margin::same(0.0),
+            rounding: Rounding::same(0.0),
             icon_text_gap: 4.0,
             color_light: Color32::PLACEHOLDER,
             color_light_hover: Color32::PLACEHOLDER,
@@ -112,23 +121,18 @@ impl<'a> ConfigBuilder<'a> {
         self
     }
 
-    pub fn outer_margin_left(mut self, outer_margin_left: f32) -> Self {
-        self.outer_margin_left = outer_margin_left;
+    pub fn inner_margin(mut self, inner_margin: Margin) -> Self {
+        self.inner_margin = inner_margin;
         self
     }
 
-    pub fn outer_margin_right(mut self, outer_margin_right: f32) -> Self {
-        self.outer_margin_right = outer_margin_right;
+    pub fn outer_margin(mut self, outer_margin: Margin) -> Self {
+        self.outer_margin = outer_margin;
         self
     }
 
-    pub fn outer_margin_top(mut self, outer_margin_top: f32) -> Self {
-        self.outer_margin_top = outer_margin_top;
-        self
-    }
-
-    pub fn outer_margin_bottom(mut self, outer_margin_bottom: f32) -> Self {
-        self.outer_margin_bottom = outer_margin_bottom;
+    pub fn rounding(mut self, rounding: Rounding) -> Self {
+        self.rounding = rounding;
         self
     }
 
@@ -149,10 +153,9 @@ impl<'a> ConfigBuilder<'a> {
             frame_size: self.frame_size,
             icon_size: self.icon_size,
             text_size: self.text_size,
-            outer_margin_left: self.outer_margin_left,
-            outer_margin_right: self.outer_margin_right,
-            outer_margin_top: self.outer_margin_top,
-            outer_margin_bottom: self.outer_margin_bottom,
+            inner_margin: self.inner_margin,
+            outer_margin: self.outer_margin,
+            rounding: self.rounding,
             icon_text_gap: self.icon_text_gap,
             color_light: self.color_light,
             color_light_hover: self.color_light_hover,
@@ -178,7 +181,7 @@ impl<'a> ConfigBuilder<'a> {
 //
 //
 pub struct SidebarTexicon<'a> {
-    pub texi_state: TexSelectedState,
+    // pub texi_state: TexSelectedState,
     pub texi_mouse: TexMouseState,
     pub texi_color: TexColorState,
     pub config: Config<'a>,
@@ -187,7 +190,7 @@ pub struct SidebarTexicon<'a> {
 impl<'a> SidebarTexicon<'a> {
     pub fn new(config: Config<'a>) -> Self {
         Self {
-            texi_state: TexSelectedState::Deselected,
+            // texi_state: TexSelectedState::Deselected,
             texi_mouse: TexMouseState::None,
             texi_color: TexColorState::Dim,
             config,
@@ -203,7 +206,7 @@ impl<'a> SidebarTexicon<'a> {
 
 #[must_use = "You should put this widget in a ui with `ui.add(widget);`"]
 pub struct Texicon<'a> {
-    on_off_state: &'a mut TexSelectedState,
+    // on_off_state: &'a mut TexSelectedState,
     mouse_state: &'a mut TexMouseState,
     color_state: &'a mut TexColorState,
     config: &'a Config<'a>,
@@ -212,7 +215,7 @@ pub struct Texicon<'a> {
 impl<'a> Texicon<'a> {
     pub fn new(sidebar_texicon: &'a mut SidebarTexicon) -> Self {
         Self {
-            on_off_state: &mut sidebar_texicon.texi_state,
+            // on_off_state: &mut sidebar_texicon.texi_state,
             mouse_state: &mut sidebar_texicon.texi_mouse,
             color_state: &mut sidebar_texicon.texi_color,
             config: &mut sidebar_texicon.config,
@@ -224,18 +227,10 @@ impl<'a> Widget for Texicon<'a> {
     fn ui(self, ui: &mut Ui) -> Response {
         // Define the frame and allocate its inner UI
         let response = egui::Frame::default()
-            .inner_margin(Margin {
-                left: 0.0,
-                right: 0.0,
-                top: 0.0,
-                bottom: 0.0,
-            })
-            .outer_margin(Margin {
-                left: self.config.outer_margin_left,
-                right: self.config.outer_margin_right,
-                top: self.config.outer_margin_top,
-                bottom: self.config.outer_margin_bottom,
-            })
+            .inner_margin(self.config.inner_margin)
+            .outer_margin(self.config.outer_margin)
+            .rounding(self.config.rounding)
+            .fill(ui.style().visuals.extreme_bg_color)
             .show(ui, |ui| {
                 // Set the minimum size of
                 // the ui (that is, the frame)
@@ -248,7 +243,7 @@ impl<'a> Widget for Texicon<'a> {
                     TexColorState::Highlight => ui.style().visuals.error_fg_color,
                 };
 
-                // ATexColorState
+                // A TexColorState???
                 ui.allocate_ui_with_layout(
                     self.config.frame_size,
                     egui::Layout::top_down(egui::Align::Center),
