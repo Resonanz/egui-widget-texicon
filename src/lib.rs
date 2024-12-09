@@ -1,42 +1,5 @@
-use egui::{
-    Color32, ImageSource, Label, Margin, Response, RichText, Rounding, Sense, Ui, Vec2, Widget,
-};
+use egui::{ImageSource, Label, Margin, Response, RichText, Rounding, Sense, Ui, Vec2, Widget};
 
-// #[derive(Default, PartialEq)]
-// pub enum TexSelectedState {
-//     #[default]
-//     Deselected,
-//     Selected,
-//     Disabled,
-// }
-
-///
-/// A number of different methods are used
-/// to share information between your app
-/// and the widget.
-///
-/// 1. A ```Config``` struct is used to configure
-///    the properties of the widget.
-/// 2. A ```SidebarTexicon``` struct is used to
-///    share state information between the widget
-///    and the main application.
-///
-///
-#[derive(Default, PartialEq)]
-pub enum TexiMouseState {
-    #[default]
-    None,
-    Clicked,
-    Hovering,
-}
-
-#[derive(Default, PartialEq)]
-pub enum TexiColorState {
-    #[default]
-    Dim,
-    On,
-    Highlight,
-}
 //
 // ======================================================================
 // ======================================================================
@@ -54,7 +17,10 @@ pub struct Config<'a> {
     outer_margin: Margin,
     rounding: Rounding,
     icon_text_gap: f32,
+    // frame_outline_width: f32,
+    // frame_outline_color: Color32,
 }
+
 //
 // ======================================================================
 // ======================================================================
@@ -72,6 +38,8 @@ pub struct ConfigBuilder<'a> {
     outer_margin: Margin,
     rounding: Rounding,
     icon_text_gap: f32,
+    // frame_outline_width: f32,
+    // frame_outline_color: Color32,
 }
 
 impl<'a> ConfigBuilder<'a> {
@@ -86,6 +54,8 @@ impl<'a> ConfigBuilder<'a> {
             outer_margin: Margin::same(0.0),
             rounding: Rounding::same(0.0),
             icon_text_gap: 0.0,
+            // frame_outline_width: 1.0,
+            // frame_outline_color: Color32::TRANSPARENT,
         }
     }
 
@@ -129,6 +99,16 @@ impl<'a> ConfigBuilder<'a> {
         self
     }
 
+    // pub fn frame_outline_width(mut self, frame_outline_width: f32) -> Self {
+    //     self.frame_outline_width = frame_outline_width;
+    //     self
+    // }
+
+    // pub fn frame_outline_color(mut self, frame_outline_color: Color32) -> Self {
+    //     self.frame_outline_color = frame_outline_color;
+    //     self
+    // }
+
     pub fn build(self) -> Config<'a> {
         Config {
             img: self.img,
@@ -140,6 +120,8 @@ impl<'a> ConfigBuilder<'a> {
             outer_margin: self.outer_margin,
             rounding: self.rounding,
             icon_text_gap: self.icon_text_gap,
+            // frame_outline_width: self.frame_outline_width,
+            // frame_outline_color: self.frame_outline_color,
         }
     }
 }
@@ -148,6 +130,34 @@ impl<'a> ConfigBuilder<'a> {
 // ======================================================================
 // ======================================================================
 //
+
+///
+/// A number of different methods are used
+/// to share information between your app
+/// and the widget.
+///
+/// 1. A ```Config``` struct is used to configure
+///    the properties of the widget.
+/// 2. A ```SidebarTexicon``` struct is used to
+///    share state information between the widget
+///    and the main application.
+///
+///
+#[derive(Default, PartialEq)]
+pub enum TexiMouseState {
+    #[default]
+    None,
+    Clicked,
+    Hovering,
+}
+
+#[derive(Default, PartialEq)]
+pub enum TexiColorState {
+    #[default]
+    Dim,
+    On,
+    Highlight,
+}
 
 // WARNING: Complicated
 //
@@ -159,20 +169,18 @@ impl<'a> ConfigBuilder<'a> {
 // This struct is instantiated in the calling crate.
 //
 //
-pub struct TexiSidebar<'a> {
-    // pub texi_state: TexSelectedState,
+pub struct TexiItem<'a> {
     pub texi_mouse: TexiMouseState,
     pub texi_color: TexiColorState,
     pub config: Config<'a>,
 }
 
-impl<'a> TexiSidebar<'a> {
+impl<'a> TexiItem<'a> {
     pub fn new(config: Config<'a>) -> Self {
         Self {
-            // texi_state: TexSelectedState::Deselected,
-            texi_mouse: TexiMouseState::None,
-            texi_color: TexiColorState::Dim,
-            config,
+            texi_mouse: TexiMouseState::None, // Initialized value
+            texi_color: TexiColorState::Dim,  // Initialized value
+            config,                           // config calls ConfigBuilder to populate
         }
     }
 }
@@ -185,19 +193,20 @@ impl<'a> TexiSidebar<'a> {
 
 #[must_use = "You should put this widget in a ui with `ui.add(widget);`"]
 pub struct Texicon<'a> {
-    // on_off_state: &'a mut TexSelectedState,
     mouse_state: &'a mut TexiMouseState,
     color_state: &'a mut TexiColorState,
     config: &'a Config<'a>,
 }
 
 impl<'a> Texicon<'a> {
-    pub fn new(sidebar_texicon: &'a mut TexiSidebar) -> Self {
+    // TexiItem struct received and destructured,
+    // providing references and pointer access
+    // to mouse and color items inside the vector.
+    pub fn new(texi: &'a mut TexiItem) -> Self {
         Self {
-            // on_off_state: &mut sidebar_texicon.texi_state,
-            mouse_state: &mut sidebar_texicon.texi_mouse,
-            color_state: &mut sidebar_texicon.texi_color,
-            config: &mut sidebar_texicon.config,
+            mouse_state: &mut texi.texi_mouse,
+            color_state: &mut texi.texi_color,
+            config: &mut texi.config,
         }
     }
 }
@@ -210,6 +219,10 @@ impl<'a> Widget for Texicon<'a> {
             .outer_margin(self.config.outer_margin)
             .rounding(self.config.rounding)
             .fill(ui.style().visuals.extreme_bg_color)
+            // .stroke(egui::Stroke {
+            //     width: self.config.frame_outline_width,
+            //     color: self.config.frame_outline_color.gamma_multiply(0.5),
+            // })
             .show(ui, |ui| {
                 // Set the minimum size of
                 // the ui (that is, the frame)
@@ -223,7 +236,7 @@ impl<'a> Widget for Texicon<'a> {
                     TexiColorState::Highlight => ui.style().visuals.warn_fg_color,
                 };
 
-                // A TexColorState???
+                //
                 ui.allocate_ui_with_layout(
                     self.config.frame_size,
                     egui::Layout::top_down(egui::Align::Center),
