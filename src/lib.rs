@@ -8,7 +8,7 @@ use egui::{ImageSource, Label, Margin, Response, RichText, Rounding, Sense, Ui, 
 
 #[derive(Clone)]
 pub struct Config<'a> {
-    img: &'a ImageSource<'a>,
+    img: Option<&'a ImageSource<'a>>, // Wrap in Option for impl Default
     text: &'a str,
     frame_size: Vec2,
     icon_size: Vec2,
@@ -21,6 +21,22 @@ pub struct Config<'a> {
     // frame_outline_color: Color32,
 }
 
+impl<'a> Default for Config<'a> {
+    fn default() -> Self {
+        Self {
+            img: None,
+            text: "",
+            frame_size: Default::default(),
+            icon_size: Default::default(),
+            text_size: Default::default(),
+            inner_margin: Default::default(),
+            outer_margin: Default::default(),
+            rounding: Default::default(),
+            icon_text_gap: Default::default(),
+        }
+    }
+}
+
 //
 // ======================================================================
 // ======================================================================
@@ -29,7 +45,7 @@ pub struct Config<'a> {
 
 // Builder starts here
 pub struct ConfigBuilder<'a> {
-    img: &'a ImageSource<'a>,
+    img: Option<&'a ImageSource<'a>>,
     text: &'a str,
     frame_size: Vec2,
     icon_size: Vec2,
@@ -43,7 +59,7 @@ pub struct ConfigBuilder<'a> {
 }
 
 impl<'a> ConfigBuilder<'a> {
-    pub fn new(img: &'a ImageSource<'a>) -> Self {
+    pub fn new(img: Option<&'a ImageSource<'a>>) -> Self {
         ConfigBuilder {
             img,
             text: "Default text",
@@ -175,6 +191,16 @@ pub struct TexiItem<'a> {
     pub config: Config<'a>,
 }
 
+impl<'a> Default for TexiItem<'a> {
+    fn default() -> Self {
+        Self {
+            texi_mouse: TexiMouseState::None, // Initialized value
+            texi_color: TexiColorState::Dim,  // Initialized value
+            config: Default::default(),
+        }
+    }
+}
+
 impl<'a> TexiItem<'a> {
     pub fn new(config: Config<'a>) -> Self {
         Self {
@@ -245,7 +271,8 @@ impl<'a> Widget for Texicon<'a> {
                         let icon_response = ui
                             .add_sized(
                                 self.config.icon_size,
-                                egui::Image::new(self.config.img.to_owned()).tint(tint_color), // Adjust color if necessary
+                                egui::Image::new(self.config.img.unwrap().to_owned())
+                                    .tint(tint_color), // Adjust color if necessary
                             )
                             .interact(Sense::click());
 

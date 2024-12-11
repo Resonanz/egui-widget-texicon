@@ -13,4 +13,3 @@ documentation = "https://docs.rs/egui-widget-texicon"
 
 [dependencies]
 egui = "0.29.1"
-eframe = "0.29.1"
