@@ -1,5 +1,16 @@
-# egui-widget-shapes
-An egui widget that combines an icon + text, as often found in modern UIs.
+# Texicon widget for egui
+## What is a Texicon widget?
+A Texicon is an egui widget that wraps a single icon + text to form an interactive button.
+
+By combining several Texicons, menu bars similar to Visual Studio Code's left side menu can be created.
+
+TODO: Add an image
+
+A Texicon is displayed using the following code where ```v``` is a vector containing the Texicon's configuration.
+```
+        ui.add(egui_widget_texicon::Texicon::new(v));
+```
+Please submit an issue on Github if you have suggestions or improvements.
 
 ## Links
 
@@ -7,85 +18,118 @@ An egui widget that combines an icon + text, as often found in modern UIs.
 * docs.rs: https://docs.rs/egui-widget-texicon
 * Github: https://github.com/Resonanz/egui-widget-texicon
 
-### Links to icons
+These icons may be useful for customizing your Texicons:
 
 * https://phosphoricons.com
 * https://fonts.google.com
 
-## What is egui-widget-texicon?
-
-egui-widget-texicon is an egui widget that combines an icon + text. Such an arrangement is often found in modern UIs.
-
-Please submit an issue on Github if you have suggestions or improvements.
-
 ## Usage
 
-In ```Cargo.toml``` add the following dependency:
+**NOTE: The following assumes you are using egui's "eframe". A template is available here: https://github.com/emilk/eframe_template**
 
+### 1. Add crate dependency
+In ```Cargo.toml``` add the following dependency:
 ```
 [dependencies]
 egui-widget-texicon = 0.1.0  <--- The latest version number can be found on Crates.io.
 ```
-
 Or you could use the following if developing locally:
 ```
 [dependencies]
 egui-widget-texicon = { path = "/Local_Path/egui-widget-texicon/" }
 ```
 
-Import the crate using
-
+### 2. Add egui image_loader dependency
+Texicons use images so we first need to add egui's image loader. In ```Cargo.toml``` add the following dependency:
 ```
-use egui_widget_texicon::{Config, Texicon};
+# For image support
+egui_extras = { version = "0.29.1", features = ["default", "all_loaders"] }
 ```
-
-To add images, define a constant that points to each image file.
-
-As illustrated below, these can be PNG or SVG or other image formats supported by egui's image_loader (https://docs.rs/egui/latest/egui/macro.include_image.html).
-
-Note that loading images using the ```include_image!``` macro bakes the raw image bytes into the binary file.
-
+Your dependencies should look somethng like this:
 ```
-pub const IMG_CAMERA: egui::ImageSource<'_> = egui::include_image!("../assets/pics/googlecamera.png");
-pub const IMG_SCATTER: egui::ImageSource<'_> = egui::include_image!("../assets/pics/chartscatter.png");
-pub const IMG_PROCESS: egui::ImageSource<'_> = egui::include_image!("../assets/pics/googlegrain.png");
-pub const IMG_IOS192: egui::ImageSource<'_> = egui::include_image!("../assets/pics/gear.svg");
+[dependencies]
+egui = "0.29.1"
+eframe = { version = "0.29.1", default-features = false, features = ["wgpu"] }
+egui-widget-texicon = "0.1.0"
+egui_extras = { version = "0.29.1", features = ["default", "all_loaders"] }
 ```
 
-Create a left side SidePanel, define the button details including button ```text```, and add the ```Texicon``` to the SidePanel.
+### 3. Add the image_loader into egui
+In eframe's ```main.rs``` ensure ```install_image_loaders``` is added:
+```
+eframe::run_native(
+    "your app name",
+    native_options,
+    Box::new(|cc| {
+        // This gives us image support:
+        egui_extras::install_image_loaders(&cc.egui_ctx);
+        Ok(Box::new(your_project_name::app::TemplateApp::new(
+            cc,
+        )))
+    }),
+)
+```
+### 4. Import Texicon module
+Import the Texicon crate into eframe's ```app.rs```.
+```
+use egui_widget_texicon;
+```
+### 5. Adding config and processing files
+Texicons needs some further setup:
+
+* First, we need a ```texicons``` folder for the following three files: ```mod.rs```, ```config.rs``` and ```process.rs```.
 
 ```
-SidePanel::left("Left panel").show(ctx, |ui| {
+Files in src/texicons/
+mod.rs
+config.rs
+process.rs
 
-    let image_name = Config {
-        icon_width: 32.,
-        icon_height: 32.,
-        text_width: 80.,
-        text_height: 80.,
-        icon_text_gap: 4.,
-        color_light: Color32::DARK_GRAY,
-        color_light_hover: Color32::BLACK,
-        color_dark: Color32::GRAY,
-        color_dark_hover: Color32::WHITE,
-        text: "Settings",
-        img: IMG_IOS192,
-    };
+Contents of mod.rs:
+pub mod config;
+pub mod process;
+```
+* ```config.rs``` is used to set the icon paths and configuration for the individual Texicons using the Builder Pattern.
+* ```process.rs``` contains code that receives mouse actions, processes the actions, and adjusts the Texicons accordingly. For example, a mouse action might be a hover. The code in ```process.rs``` captures the hover, performs some logic, then sets the Texicon to the hover color. (To be clear, Texicon state information is stored in the main egui code, not in the widget itself.)
 
-    ui.vertical_centered(|ui| {
-        ui.add_space(10.);
-        if ui.add(Texicon::new(image_name)).clicked() {  // Texicon 1
-            println!("Clicked btn 1");
-        };
-        ui.add_space(10.);
-        if ui.add(Texicon::new(image_name)).clicked() {  // Texicon 2
-            println!("Clicked btn 2");
-        };
-        ui.add_space(10.);
-        if ui.add(Texicon::new(image_name)).clicked() {  // Texicon 3
-            println!("Clicked btn 3");
-        };
-        ui.add_space(10.);
-        warn_if_debug_build(ui);
+### 6. Using Texicons inside ```app.rs```
+
+```
+pub struct TemplateApp<'a> {
+    run_once: bool,
+    // Add Texicons
+    which_texi_selected: TexiSelected,
+    vec_of_texis: Vec<(TexiSelected, TexiItem<'a>)>,
+}
+
+impl<'a> Default for TemplateApp<'a> {
+    fn default() -> Self {
+        Self {
+            run_once: false,
+            // Add Texicons
+            which_texi_selected: TexiSelected::Gear, // Default state
+            vec_of_texis: Vec::new(),
+        }
+    }
+}
+```
+Fill the texicon vector once only
+```
+impl<'a> eframe::App for TemplateApp<'a> {
+  fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    // Run once
+    if self.run_once == false {
+      self.run_once = true;
+
+      // Set up the vector containing the sidebar Texicons
+      super::texicon::config::fill_vec(&mut self.vec_of_texis);
+```
+In the left side panel:
+```
+// Show the Texicons
+ui.vertical_centered(|ui| {
+    self.vec_of_texis.iter_mut().for_each(|(_, v)| {
+        ui.add(egui_widget_texicon::Texicon::new(v));
     });
 });
 ```
