@@ -1,6 +1,4 @@
-use egui::{
-    Color32, ImageSource, Label, Margin, Response, RichText, Rounding, Sense, Ui, Vec2, Widget,
-};
+use egui::{ImageSource, Label, Margin, Response, RichText, Rounding, Sense, Ui, Vec2, Widget};
 
 //
 // ======================================================================
@@ -13,14 +11,14 @@ pub struct Config<'a> {
     img: Option<&'a ImageSource<'a>>, // Wrap in Option for impl Default
     text: &'a str,
     frame_size: Vec2,
-    frame_outline_width: f32,
-    frame_outline_color: Color32,
-    frame_inner_margin: Margin,
-    frame_outer_margin: Margin,
-    frame_rounding: Rounding,
     icon_size: Vec2,
     text_size: f32,
+    inner_margin: Margin,
+    outer_margin: Margin,
+    rounding: Rounding,
     icon_text_gap: f32,
+    // frame_outline_width: f32,
+    // frame_outline_color: Color32,
 }
 
 impl<'a> Default for Config<'a> {
@@ -29,13 +27,11 @@ impl<'a> Default for Config<'a> {
             img: None,
             text: "",
             frame_size: Default::default(),
-            frame_outline_width: Default::default(),
-            frame_outline_color: Default::default(),
-            frame_inner_margin: Default::default(),
-            frame_outer_margin: Default::default(),
-            frame_rounding: Default::default(),
             icon_size: Default::default(),
             text_size: Default::default(),
+            inner_margin: Default::default(),
+            outer_margin: Default::default(),
+            rounding: Default::default(),
             icon_text_gap: Default::default(),
         }
     }
@@ -47,37 +43,35 @@ impl<'a> Default for Config<'a> {
 // ======================================================================
 //
 
-// This struct holds all
-// Texicon configuration.
+// Builder starts here
 pub struct ConfigBuilder<'a> {
     img: Option<&'a ImageSource<'a>>,
     text: &'a str,
     frame_size: Vec2,
-    frame_outline_width: f32,
-    frame_outline_color: Color32,
-    frame_inner_margin: Margin,
-    frame_outer_margin: Margin,
-    frame_rounding: Rounding,
     icon_size: Vec2,
     text_size: f32,
+    inner_margin: Margin,
+    outer_margin: Margin,
+    rounding: Rounding,
     icon_text_gap: f32,
+    // frame_outline_width: f32,
+    // frame_outline_color: Color32,
 }
 
 impl<'a> ConfigBuilder<'a> {
     pub fn new(img: Option<&'a ImageSource<'a>>) -> Self {
         ConfigBuilder {
-            // Default values
             img,
             text: "Default text",
             frame_size: Vec2 { x: 40.0, y: 60.0 },
-            frame_outline_width: 4.0,
-            frame_outline_color: Color32::TRANSPARENT,
-            frame_inner_margin: Margin::same(0.0),
-            frame_outer_margin: Margin::same(0.0),
-            frame_rounding: Rounding::same(0.0),
             icon_size: Vec2 { x: 40.0, y: 40.0 },
             text_size: 16.0,
+            inner_margin: Margin::same(0.0),
+            outer_margin: Margin::same(0.0),
+            rounding: Rounding::same(0.0),
             icon_text_gap: 0.0,
+            // frame_outline_width: 1.0,
+            // frame_outline_color: Color32::TRANSPARENT,
         }
     }
 
@@ -91,31 +85,6 @@ impl<'a> ConfigBuilder<'a> {
         self
     }
 
-    pub fn frame_outline_width(mut self, frame_outline_width: f32) -> Self {
-        self.frame_outline_width = frame_outline_width;
-        self
-    }
-
-    pub fn frame_outline_color(mut self, frame_outline_color: Color32) -> Self {
-        self.frame_outline_color = frame_outline_color;
-        self
-    }
-
-    pub fn frame_inner_margin(mut self, frame_inner_margin: Margin) -> Self {
-        self.frame_inner_margin = frame_inner_margin;
-        self
-    }
-
-    pub fn frame_outer_margin(mut self, frame_outer_margin: Margin) -> Self {
-        self.frame_outer_margin = frame_outer_margin;
-        self
-    }
-
-    pub fn frame_rounding(mut self, frame_rounding: Rounding) -> Self {
-        self.frame_rounding = frame_rounding;
-        self
-    }
-
     pub fn icon_size(mut self, icon_size: Vec2) -> Self {
         self.icon_size = icon_size;
         self
@@ -126,28 +95,52 @@ impl<'a> ConfigBuilder<'a> {
         self
     }
 
+    pub fn inner_margin(mut self, inner_margin: Margin) -> Self {
+        self.inner_margin = inner_margin;
+        self
+    }
+
+    pub fn outer_margin(mut self, outer_margin: Margin) -> Self {
+        self.outer_margin = outer_margin;
+        self
+    }
+
+    pub fn rounding(mut self, rounding: Rounding) -> Self {
+        self.rounding = rounding;
+        self
+    }
+
     pub fn icon_text_space(mut self, icon_text_gap: f32) -> Self {
         self.icon_text_gap = icon_text_gap;
         self
     }
+
+    // pub fn frame_outline_width(mut self, frame_outline_width: f32) -> Self {
+    //     self.frame_outline_width = frame_outline_width;
+    //     self
+    // }
+
+    // pub fn frame_outline_color(mut self, frame_outline_color: Color32) -> Self {
+    //     self.frame_outline_color = frame_outline_color;
+    //     self
+    // }
 
     pub fn build(self) -> Config<'a> {
         Config {
             img: self.img,
             text: self.text,
             frame_size: self.frame_size,
-            frame_outline_width: self.frame_outline_width,
-            frame_outline_color: self.frame_outline_color,
-            frame_inner_margin: self.frame_inner_margin,
-            frame_outer_margin: self.frame_outer_margin,
-            frame_rounding: self.frame_rounding,
             icon_size: self.icon_size,
             text_size: self.text_size,
+            inner_margin: self.inner_margin,
+            outer_margin: self.outer_margin,
+            rounding: self.rounding,
             icon_text_gap: self.icon_text_gap,
+            // frame_outline_width: self.frame_outline_width,
+            // frame_outline_color: self.frame_outline_color,
         }
     }
 }
-
 //
 // ======================================================================
 // ======================================================================
@@ -182,45 +175,69 @@ pub enum TexiColorState {
     Highlight,
 }
 
+// WARNING: Complicated
 //
-// ======================================================================
-// ======================================================================
-// ======================================================================
+// The purpose of this struct's contents is to
+// create portals between the main code and this
+// widget code. It does this using references and
+// pointers to communicate via e.g. bools and enums.
 //
-
-// This struct in instantiated
-// from/in the non-widget code.
-// The struct is this passed
-// back here into new() as a
-// reference to create a portal
-// between the two codebases.
-#[derive(Default)]
-pub struct TexiconSharedVars {
-    pub mouse_state: TexiMouseState,
-    pub color_state: TexiColorState,
+// This struct is instantiated in the calling crate.
+//
+//
+pub struct TexiItem<'a> {
+    pub texi_mouse: TexiMouseState,
+    pub texi_color: TexiColorState,
+    pub config: Config<'a>,
 }
+
+impl<'a> Default for TexiItem<'a> {
+    fn default() -> Self {
+        Self {
+            texi_mouse: TexiMouseState::None, // Initialized value
+            texi_color: TexiColorState::Dim,  // Initialized value
+            config: Default::default(),
+        }
+    }
+}
+
+impl<'a> TexiItem<'a> {
+    pub fn new(config: Config<'a>) -> Self {
+        Self {
+            texi_mouse: TexiMouseState::None, // Initialized value
+            texi_color: TexiColorState::Dim,  // Initialized value
+            config,                           // config calls ConfigBuilder to populate
+        }
+    }
+}
+
+//
+// ======================================================================
+// ======================================================================
+// ======================================================================
+//
 
 #[must_use = "You should put this widget in a ui with `ui.add(widget);`"]
 pub struct Texicon<'a> {
-    pub mouse_state_ref: &'a mut TexiMouseState,
-    color_state_ref: &'a mut TexiColorState,
-    config_ref: &'a Config<'a>,
+    mouse_state: &'a mut TexiMouseState,
+    color_state: &'a mut TexiColorState,
+    config: &'a Config<'a>,
 }
 
 impl<'a> Texicon<'a> {
-    // TexiconSharedVars and Config structs
-    // are passed into here and destructured.
-    // This provides references for pointer
-    // access so that data can be shared by
-    // reference betwee the two codebases.
-    // Further, Config allows access to the
-    // ConfigBuilder generated config data.
-    pub fn new(texi_shared_vars: &'a mut TexiconSharedVars, config: &'a Config<'a>) -> Self {
+    // TexiItem struct received and destructured,
+    // providing references and pointer access
+    // to mouse and color items inside the vector.
+    pub fn new(texi: &'a mut TexiItem) -> Self {
         Self {
-            mouse_state_ref: &mut texi_shared_vars.mouse_state,
-            color_state_ref: &mut texi_shared_vars.color_state,
-            config_ref: &config,
+            mouse_state: &mut texi.texi_mouse,
+            color_state: &mut texi.texi_color,
+            config: &mut texi.config,
         }
+    }
+
+    pub fn get_tet(&self) -> u32 {
+        123
     }
 }
 
@@ -228,22 +245,22 @@ impl<'a> Widget for Texicon<'a> {
     fn ui(self, ui: &mut Ui) -> Response {
         // Define the frame and allocate its inner UI
         let response = egui::Frame::default()
-            .inner_margin(self.config_ref.frame_inner_margin)
-            .outer_margin(self.config_ref.frame_outer_margin)
-            .rounding(self.config_ref.frame_rounding)
+            .inner_margin(self.config.inner_margin)
+            .outer_margin(self.config.outer_margin)
+            .rounding(self.config.rounding)
             .fill(ui.style().visuals.extreme_bg_color)
-            .stroke(egui::Stroke {
-                width: self.config_ref.frame_outline_width,
-                color: self.config_ref.frame_outline_color.gamma_multiply(0.5),
-            })
+            // .stroke(egui::Stroke {
+            //     width: self.config.frame_outline_width,
+            //     color: self.config.frame_outline_color.gamma_multiply(0.5),
+            // })
             .show(ui, |ui| {
                 // Set the minimum size of
                 // the ui (that is, the frame)
-                ui.set_min_size(self.config_ref.frame_size);
-                ui.set_max_size(self.config_ref.frame_size); // Layout the icon and text vertically with some spacing
+                ui.set_min_size(self.config.frame_size);
+                ui.set_max_size(self.config.frame_size); // Layout the icon and text vertically with some spacing
 
                 // Set colors for text and icon
-                let tint_color = match *self.color_state_ref {
+                let tint_color = match *self.color_state {
                     TexiColorState::Dim => ui.style().visuals.weak_text_color(),
                     TexiColorState::On => ui.style().visuals.text_color(),
                     TexiColorState::Highlight => ui.style().visuals.warn_fg_color,
@@ -251,28 +268,28 @@ impl<'a> Widget for Texicon<'a> {
 
                 //
                 ui.allocate_ui_with_layout(
-                    self.config_ref.frame_size,
+                    self.config.frame_size,
                     egui::Layout::top_down(egui::Align::Center),
                     |ui| {
                         // Add icon
                         let icon_response = ui
                             .add_sized(
-                                self.config_ref.icon_size,
-                                egui::Image::new(self.config_ref.img.unwrap().to_owned())
+                                self.config.icon_size,
+                                egui::Image::new(self.config.img.unwrap().to_owned())
                                     .tint(tint_color), // Adjust color if necessary
                             )
                             .interact(Sense::click());
 
                         // Add some vertical spacing
-                        ui.add_space(self.config_ref.icon_text_gap);
+                        ui.add_space(self.config.icon_text_gap);
 
                         // Add text
                         let text_response = ui
                             .add(
                                 Label::new(
-                                    RichText::new(self.config_ref.text)
+                                    RichText::new(self.config.text)
                                         .color(tint_color)
-                                        .size(self.config_ref.text_size),
+                                        .size(self.config.text_size),
                                 )
                                 .selectable(false),
                             )
@@ -280,14 +297,14 @@ impl<'a> Widget for Texicon<'a> {
 
                         // Update state depending upon response
                         if icon_response.clicked {
-                            *self.mouse_state_ref = TexiMouseState::Clicked
+                            *self.mouse_state = TexiMouseState::Clicked
                         } else if icon_response.contains_pointer() {
-                            *self.mouse_state_ref = TexiMouseState::Hovering
+                            *self.mouse_state = TexiMouseState::Hovering
                         } else {
-                            *self.mouse_state_ref = TexiMouseState::None
+                            *self.mouse_state = TexiMouseState::None
                         }
 
-                        *self.mouse_state_ref = if icon_response.clicked || text_response.clicked {
+                        *self.mouse_state = if icon_response.clicked || text_response.clicked {
                             TexiMouseState::Clicked
                         } else if icon_response.contains_pointer()
                             || text_response.contains_pointer()
