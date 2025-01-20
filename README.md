@@ -1,4 +1,4 @@
-# Texicon widget for egui
+# Texicon (Text + icon) widget for egui
 
 The simplest way to get the Texicon widget working is to clone the git repository, then copy the Texicon folder into the /src folder in your project.
 
