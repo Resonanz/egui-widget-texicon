@@ -1,4 +1,11 @@
-# Texicon widget for egui
+# Texicon (Text + icon) widget for egui
+
+The simplest way to get the Texicon widget working is to clone the git repository, then copy the Texicon folder into the /src folder in your project.
+
+## Using SVG icons
+
+SVG icons can be used, however they should be created using the color 0XFFFFFF. This enables egui's tint() to be used and display the icon in the tint color.
+
 ## What is a Texicon widget?
 A Texicon is an egui widget that wraps a single icon + text to form an interactive button.
 
