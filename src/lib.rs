@@ -71,7 +71,7 @@
 //! });
 //! ```
 
-use egui::{Color32, ImageSource, Margin, Rounding, Vec2};
+use egui::{Color32, CornerRadius, ImageSource, Margin, Vec2};
 use egui::{Label, Response, RichText, Sense, Ui, Widget};
 
 /// Texicon mouse interaction states
@@ -110,7 +110,7 @@ pub struct Texicon<'a> {
     pub frame_outline_color: Color32,
     pub frame_inner_margin: Margin,
     pub frame_outer_margin: Margin,
-    pub frame_rounding: Rounding,
+    pub frame_rounding: CornerRadius,
     pub icon_size: Vec2,
     pub text_size: f32,
     pub icon_text_gap: f32,
@@ -138,15 +138,15 @@ impl<'a> Texicon<'a> {
             text: String::from("No text defined"),
             frame_size: Vec2 { x: 60.0, y: 60.0 },
             frame_outline_width: 1.0,
-            frame_outline_color: ui.visuals().weak_text_color(), //Color32::TRANSPARENT,
-            frame_inner_margin: Margin::same(6.0),
+            frame_outline_color: ui.visuals().weak_text_color(),
+            frame_inner_margin: Margin::same(6),
             frame_outer_margin: Margin {
-                left: 0.0,
-                right: 0.0,
-                top: 10.0,
-                bottom: 10.0,
+                left: 0,
+                right: 0,
+                top: 10,
+                bottom: 10,
             },
-            frame_rounding: Rounding::same(10.0),
+            frame_rounding: egui::CornerRadius::same(10),
             icon_size: Vec2 { x: 32.0, y: 36.0 },
             text_size: 14.0,
             icon_text_gap: 0.0,
@@ -203,7 +203,7 @@ impl<'a> Texicon<'a> {
 
     /// Set the frame_rounding for the Texicon.
     #[inline]
-    pub fn frame_rounding(mut self, frame_rounding: Rounding) -> Self {
+    pub fn frame_rounding(mut self, frame_rounding: CornerRadius) -> Self {
         self.frame_rounding = frame_rounding;
         self
     }
@@ -239,11 +239,14 @@ impl Widget for Texicon<'_> {
         let response = egui::Frame::default()
             .inner_margin(self.frame_inner_margin)
             .outer_margin(self.frame_outer_margin)
-            .rounding(self.frame_rounding)
-            .fill(ui.style().visuals.extreme_bg_color)
+            .corner_radius(self.frame_rounding)
+            .fill(match self.color_state {
+                TexiColorState::Highlight => ui.style().visuals.extreme_bg_color,
+                _ => ui.style().visuals.panel_fill,
+            })
             .stroke(egui::Stroke {
                 width: self.frame_outline_width,
-                color: self.frame_outline_color.gamma_multiply(0.5),
+                color: self.frame_outline_color,
             })
             .show(ui, |ui| {
                 // Set the minimum size of
@@ -286,15 +289,7 @@ impl Widget for Texicon<'_> {
                             )
                             .interact(Sense::click());
                         // Update state depending upon response
-                        if icon_response.clicked {
-                            *self.mouse_state = TexiMouseState::Clicked
-                        } else if icon_response.contains_pointer() {
-                            *self.mouse_state = TexiMouseState::Hovering
-                        } else {
-                            *self.mouse_state = TexiMouseState::None
-                        }
-
-                        *self.mouse_state = if icon_response.clicked || text_response.clicked {
+                        *self.mouse_state = if icon_response.clicked() || text_response.clicked() {
                             TexiMouseState::Clicked
                         } else if icon_response.contains_pointer()
                             || text_response.contains_pointer()

@@ -12,4 +12,4 @@ license = "MIT"
 documentation = "https://docs.rs/egui-widget-texicon"
 
 [dependencies]
-egui = "0.30.0"
+egui = "0.31.0"
